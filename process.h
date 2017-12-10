@@ -12,6 +12,10 @@ class Process{
 			TIMES.push_back(newtime);
 		}
 		
+		char get_name(){
+			return PROC_ID;
+		}
+		
 	private:
 		char PROC_ID;
 		int MEM_FRAMES;

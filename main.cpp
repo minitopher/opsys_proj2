@@ -29,9 +29,32 @@ std::vector<std::string> split(const std::string &s, char delim) {
     return elems;
 }
 
+void next_fit(std::vector<std::vector<char> > mem, std::vector<Process> processes){
+	bool done = false;
+	int time = 0;
+	while(done == false){
+		for(unsigned int i = 0; i < processes.size(); i++){
+			std::cout << processes[i].get_name() << std::endl;
+		}
+		time += 1;
+		//if(processes[0] ){
+			done = true;
+		//}
+	}
+	
+}
+
+void best_fit(std::vector<std::vector<char> > mem, std::vector<Process> processes){
+	
+}
+
+void first_fit(std::vector<std::vector<char> > mem, std::vector<Process> processes){
+	
+}
+
 void print_mem(std::vector<std::vector<char> > mem, int frames, int lines){
 	std::string memory_block = "";
-	for (unsigned int i = 0; i < frames; i++){
+	for (int i = 0; i < frames; i++){
 		memory_block += '=';
 	}
 	memory_block += '\n';
@@ -78,7 +101,7 @@ int main(int argc, char* argv[]){
 			temp1 = split(line, ' ');
 			p->create_process(temp1[0][0], std::atoi(temp1[1].c_str()) );
 			std::cout <<"Size of line:" << temp1[0] << " -- " << temp1.size()-2 << std::endl;
-			for (int i = 2; i < temp1.size(); i++){
+			for (unsigned int i = 2; i < temp1.size(); i++){
 				std::vector<std::string> temp2;
 				temp2 = split(temp1[i], '/');
 				std::pair<int,int> temp_pair(std::atoi(temp2[0].c_str()), std::atoi(temp2[0].c_str()));
@@ -86,15 +109,13 @@ int main(int argc, char* argv[]){
 			}
 			
 			processes.push_back(*p);
-			
-
-			//processes.push_back(*p);
-			
+						
 			
 		}
 		//std::cout << "hello" << std::endl;
 	}
 	//std::cout << "hello again" << std::endl;
 	input.close();
+	next_fit(memory, processes);
 }
 
