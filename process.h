@@ -15,6 +15,18 @@ class Process{
 		char get_name(){
 			return PROC_ID;
 		}
+
+		int get_memframes(){
+			return MEM_FRAMES;
+		}
+
+		std::vector<std::pair<int,int> > get_times(){
+			return TIMES;
+		}
+
+		void remove_time(){
+			TIMES.erase(TIMES.begin());
+		}	
 		
 	private:
 		char PROC_ID;

@@ -71,6 +71,19 @@ void defrag_mem(std::vector<char> &mem){
 	
 }
 
+int remaining_free(std::vector<char> mem){
+	int count = 0;
+	for (int i = 0; i < mem.size(); i++){
+		if (mem[i] == '.'){
+			count++;
+		}
+	}
+
+	return count;
+}
+
+
+
 void next_fit(std::vector<char> mem, std::vector<Process> processes){
 	bool done = false;
 	int time = 0;
@@ -91,8 +104,31 @@ void best_fit(std::vector<char > mem, std::vector<Process> processes){
 }
 
 void first_fit(std::vector<char> mem, std::vector<Process> processes){
-	//I'll do this one
+	//I'll do this one -Casey
 	
+	int time = 0;
+	std::vector<Process> queue;
+
+	while (time >=0){
+		if (processes.size() == 0){
+			break;
+		}
+
+		if (queue.size() != 0){
+			std::vector<std::pair<int,int> > process_hold;
+			process_hold = queue[0].get_times();
+			if (process_hold[0].first == 0){
+				
+			}
+		}
+
+		
+		
+
+		
+	}
+
+	return;
 }
 
 
@@ -158,7 +194,8 @@ int main(int argc, char* argv[]){
 	//Testing Defragmentation and printing
 	//defrag_mem(testmem);
 	//print_mem(testmem,32,8);
-
+	std::vector<Process> firstfit = processes;
+	
 	
 
 	next_fit(memory, processes);
