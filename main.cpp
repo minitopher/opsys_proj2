@@ -82,6 +82,30 @@ int remaining_free(std::vector<char> mem){
 	return count;
 }
 
+void remove_proc(std::vector<char> &mem, char proc){
+	for (int i = 0; i < mem.size(); i++){
+		if (mem[i] == proc){
+			mem[i] = '.';
+		}
+	}
+}
+
+bool check_location(std::vector<char> mem, int start, int len){
+	int space = 0;
+	if (start+len > mem.size()){
+		space = mem.size();
+		
+	}
+	else{
+		space = start+len;
+	}
+	for (int i = start; i < space; i++){
+		if (mem[i] != '.'){
+				return false;
+		} 
+	}
+	return true;
+}
 
 
 void next_fit(std::vector<char> mem, std::vector<Process> processes){
@@ -107,25 +131,56 @@ void first_fit(std::vector<char> mem, std::vector<Process> processes){
 	//I'll do this one -Casey
 	
 	int time = 0;
+	int space = mem.size();
 	std::vector<Process> queue;
 
-	while (time >=0){
-		if (processes.size() == 0){
-			break;
-		}
 
-		if (queue.size() != 0){
-			std::vector<std::pair<int,int> > process_hold;
-			process_hold = queue[0].get_times();
-			if (process_hold[0].first == 0){
-				
+	std::cout << "time " << time << "ms: Simulator started (Contiguous -- Next-Fit)" << std::endl;
+	while (processes.size() != 0){
+		
+		for (unsigned int i = 0; i < processes.size(); i++){
+			std::vector<std::pair<int, int> > proc_hold = processes[i].get_times();
+			if (proc_hold.size() > 0){
+				if (proc_hold[0].second == time - proc_hold[0].first){
+					std::cout << "time " << time << "ms: Process " << processes[i].get_name() << " removed :" << std::endl;
+					print_mem(mem, 32, 8);
+					processes[i].remove_time();
+				}
+			} else{
+				//no more processes to do, remove this
+				processes.erase(processes.begin() + i-1);
 			}
 		}
 
-		
-		
+		for (unsigned int i = 0; i < processes.size(); i++){
+			std::vector<std::pair<int, int> > proc_hold = processes[i].get_times();
+			if (proc_hold[0].first == time){
+				//Something is being added	
+				int space_remaining = remaining_free(mem);
+				if (processes[i].get_memframes() > space_remaining){
+					//cannot add this process, not enough space
+				}
 
-		
+				else{
+					bool placed = false;
+					for (unsigned int j = 0; j < mem.size(); j++){
+						if (mem[j] == '.'){								//if we havent started on a 
+							if (check_location(mem, j, processes[i].get_memframes())){
+								placed = true;
+								break;
+								//found a spot where it fits
+							}
+							else{
+								while(mem[j] == '.'){
+									j++;
+								}
+								
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 
 	return;
