@@ -131,6 +131,30 @@ bool check_location(std::vector<char> mem, int start, int len){
 	return true;
 }
 
+//THIS FINDS SMALLEST PARTITION IN THE MEMORY THAT CAN FIT SIZE, IF TIE, THE ONE CLOSER TO THE TOP
+int smallest_partition(std::vector<char> mem, int size){
+	std::vector<int, int> empty_partitions;
+
+	
+	for (unsigned int i = 0; i < mem.size(); i++){
+		int start = 0;
+		int len = 0;
+		std::pair<int,int> temp;
+		if (mem[i] == '.'){
+			start = i;
+		}
+		while (mem[i] == '.'){
+			len++;
+			i++;
+		}
+		
+		temp.first = start;
+		temp.second = len;
+		
+	}
+	return 5;
+}
+
 
 void next_fit(std::vector<char> mem, std::vector<Process> processes){
 	bool done = false;
@@ -267,7 +291,8 @@ void first_fit(std::vector<char> mem, std::vector<Process> processes){
 		}
 		time++;
 	}
-
+	
+	std::cout << "time " << time-2 << "ms: Simulator ended (Contiguous -- First-Fit)" << std::endl;
 	return;
 }
 
