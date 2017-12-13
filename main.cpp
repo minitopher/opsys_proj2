@@ -171,7 +171,7 @@ int smallest_partition(std::vector<char> mem, int size){
 		}
 	}
 	
-	return 5;
+	return smallest.first;
 }
 
 
@@ -192,7 +192,112 @@ void next_fit(std::vector<char> mem, std::vector<Process> processes){
 
 void best_fit(std::vector<char > mem, std::vector<Process> processes){
 	//TODO: Make a function that makes this easy to do, should just make a list of all available spaces
+	//I'll do this one -Casey
 	
+	int time = 0;
+	//int space = mem.size();
+	std::vector<Process> queue;
+
+
+	std::cout << "time " << time << "ms: Simulator started (Contiguous -- Best-Fit)" << std::endl;
+	while (processes.size() != 0){
+		
+		//THIS FUNCTION CHECKS TO SEE IF ANYTHING NEEDS TO BE REMOVED
+		for (unsigned int i = 0; i < processes.size(); i++){
+			std::pair<int, int> proc_hold = processes[i].get_times();
+			//std::cout << proc_hold.first << "	" << proc_hold.second << std::endl;
+			if (proc_hold.first != -1 && time == proc_hold.first + proc_hold.second){
+				//std::cout << proc_hold.first+proc_hold.second << std::endl;
+				remove_proc(mem, processes[i].get_name());
+				std::cout << "time " << time << "ms: Process " << processes[i].get_name() << " removed:" << std::endl;
+				print_mem(mem, 32, 8);
+				processes[i].remove_time();
+
+			} 
+			else if (proc_hold.first == -1){
+				//no more processes to do, remove this
+				processes.erase(processes.begin() + i);
+			}
+		}
+
+		//THIS CHECKS TO SEE IF ANYTHING NEEDS TO BE ADDED / DEFRAGMENTATION
+		for (unsigned int i = 0; i < processes.size(); i++){
+			std::pair<int, int> proc_hold = processes[i].get_times();
+			//THIS MEANS THAT SOMETHING IS TO BE ADDED AT THIS TIME
+			if (proc_hold.first == time && proc_hold.first != -1){
+				std::cout << "time " << time << "ms: Process " << processes[i].get_name() << " arrived (requires " << processes[i].get_memframes() << " frames)" << std::endl;
+				//Something is being added	
+				int space_remaining = remaining_free(mem);
+
+				//NOT ENOUGH SPACE, EVEN WITH DEFRAGMENTATION
+				if (processes[i].get_memframes() > space_remaining){
+					//TODO: Skip this process and remove it, its a useless cunt
+					std::cout << "time " << time << "ms: Cannot place process " << processes[i].get_name() << " -- skipped!" << std::endl;
+					print_mem(mem, 32, 8);
+					processes[i].remove_time();
+					//Check if that was the last process to be removed
+					if (processes[i].num_proc() == 0){
+						processes.erase(processes.begin() + i);
+					}
+
+
+				
+					
+				}
+
+				//THERE IS ENOUGH SPACE
+				else{
+					int place_here = 0;
+					bool placed = false;
+					
+					place_here = smallest_partition(mem, processes[i].get_memframes());
+					if (place_here != -1){
+						placed = true;
+					}					
+					
+					//IT WAS NOT PLACED, DEFRAG PLS
+					if (!placed){
+						//defragged
+						int offset = 0;
+						offset = defrag_mem(mem, time);
+						time += offset;
+
+						//ADDS ALL THE TIMES FOR THE ARRIVAL TIMES FOR ALL THE PROCESSES
+						for (unsigned int m = 0; m < processes.size(); m++){
+							processes[m].add_arrtime(offset);
+						}
+
+						int defrag_place = 0;
+						while (mem[defrag_place] != '.'){
+							defrag_place++;
+						}
+						for (int n = defrag_place; n < defrag_place + processes[i].get_memframes(); n++){
+							mem[n] = processes[i].get_name();
+						}
+						
+						print_mem(mem, 32, 8);
+
+											
+					}
+					//PLACE THAT SHIT LIKE ITS HOT
+					else{
+						//it placed, move along
+						//TODO: add the actual function you dumb fuck
+						for (int k = place_here; k < place_here+processes[i].get_memframes(); k++){
+							mem[k] = processes[i].get_name();
+						}
+						std::cout << "time " << time << " ms: Placed process " << processes[i].get_name() << ":" <<std::endl;
+						print_mem(mem, 32, 8);
+						
+					}
+				}
+			}
+		}
+		time++;
+	}
+	
+	std::cout << "time " << time-2 << "ms: Simulator ended (Contiguous -- Best-Fit)" << std::endl;
+	return;
 }
 
 void first_fit(std::vector<char> mem, std::vector<Process> processes){
@@ -379,8 +484,11 @@ int main(int argc, char* argv[]){
 	//defrag_mem(testmem);
 	//print_mem(testmem,32,8);
 	std::vector<Process> firstfit = processes;
+	std::vector<Process> bestfit = processes;
 	
-	first_fit(memory, processes);
-	next_fit(memory, processes);
+	first_fit(memory, firstfit);
+	std::cout << std::endl;
+	best_fit(memory, bestfit);
+	//next_fit(memory, processes);
 }
 
