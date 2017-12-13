@@ -133,7 +133,8 @@ bool check_location(std::vector<char> mem, int start, int len){
 
 //THIS FINDS SMALLEST PARTITION IN THE MEMORY THAT CAN FIT SIZE, IF TIE, THE ONE CLOSER TO THE TOP
 int smallest_partition(std::vector<char> mem, int size){
-	std::vector<int, int> empty_partitions;
+	std::vector<std::pair<int, int> > empty_partitions;
+	std::pair<int,int> smallest(-1,-1);
 
 	
 	for (unsigned int i = 0; i < mem.size(); i++){
@@ -150,8 +151,26 @@ int smallest_partition(std::vector<char> mem, int size){
 		
 		temp.first = start;
 		temp.second = len;
+		empty_partitions.push_back(temp);
 		
 	}
+
+	for (unsigned int i = 0; i < empty_partitions.size(); i++){
+		if (empty_partitions[i].second){
+			if (empty_partitions[i].second > size){
+				if (smallest.first == -1){
+					smallest = empty_partitions[i];
+				}
+				else if (empty_partitions[i].second < smallest.second){
+					smallest = empty_partitions[i];
+				}
+			}
+			else if(empty_partitions[i].second == size){
+				return empty_partitions[i].first;
+			}
+		}
+	}
+	
 	return 5;
 }
 
