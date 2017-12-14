@@ -13,6 +13,12 @@
 
 #include "process.h"
 
+
+//Operating Systems - Project 2
+//By:
+//Daniel Hendricks - hendrd - 661530594
+//Casey Lee - clee21 - 661431233
+
 //From https://stackoverflow.com/questions/236129/the-most-elegant-way-to-iterate-the-words-of-a-string
 template<typename Out>	
 void split(const std::string &s, char delim, Out result) {
@@ -559,6 +565,155 @@ void first_fit(std::vector<char> mem, std::vector<Process> processes){
 	return;
 }
 
+void non_contiguous(std::vector<char> mem, std::vector<Process> processes){
+	
+	int time = 0;
+	//int space = mem.size();
+	std::vector<Process> queue;
+
+
+	std::cout << "time " << time << "ms: Simulator started (Non-contiguous)" << std::endl;
+	while (processes.size() != 0){
+		
+		//THIS FUNCTION CHECKS TO SEE IF ANYTHING NEEDS TO BE REMOVED
+		for (unsigned int i = 0; i < processes.size(); i++){
+			std::pair<int, int> proc_hold = processes[i].get_times();
+			//std::cout << proc_hold.first << "	" << proc_hold.second << std::endl;
+			if (proc_hold.first != -1 && time == proc_hold.first + proc_hold.second){
+				//std::cout << proc_hold.first+proc_hold.second << std::endl;
+				remove_proc(mem, processes[i].get_name());
+				std::cout << "time " << time << "ms: Process " << processes[i].get_name() << " removed:" << std::endl;
+				print_mem(mem, 32, 8);
+				processes[i].remove_time();
+				std::cout << "PAGE TABLE [page,frame]:" << std::endl;
+				for(unsigned int m = 0; m < processes.size(); m++){
+					bool found = false;
+					int number = 0;
+					for(unsigned int k = 0; k < mem.size(); k++){
+						if(mem[k] == processes[m].get_name()){
+							if(found == false){
+								std::cout << processes[m].get_name() << ":";
+								found = true;
+							}
+							if(number % 10 == 0&& number != 0){
+								std::cout<<std::endl;
+							}
+							else{
+								std::cout<<" ";
+							}
+							std::cout << "[" << number << "," << k << "]" ;
+							number++;						
+						}
+					}
+					if(found == true){
+						std::cout << std::endl;
+					}
+				}
+
+			} 
+			else if (proc_hold.first == -1){
+				//no more processes to do, remove this
+				processes.erase(processes.begin() + i);
+			}
+		}
+
+		//THIS CHECKS TO SEE IF ANYTHING NEEDS TO BE ADDED / DEFRAGMENTATION
+		for (unsigned int i = 0; i < processes.size(); i++){
+			std::pair<int, int> proc_hold = processes[i].get_times();
+			//THIS MEANS THAT SOMETHING IS TO BE ADDED AT THIS TIME
+			if (proc_hold.first == time && proc_hold.first != -1){
+				std::cout << "time " << time << "ms: Process " << processes[i].get_name() << " arrived (requires " << processes[i].get_memframes() << " frames)" << std::endl;
+				//Something is being added	
+				int space_remaining = remaining_free(mem);
+
+				//NOT ENOUGH SPACE, EVEN WITH DEFRAGMENTATION
+				if (processes[i].get_memframes() > space_remaining){
+					//TODO: Skip this process and remove it, its a useless cunt
+					std::cout << "time " << time << "ms: Cannot place process " << processes[i].get_name() << " -- skipped!" << std::endl;
+					print_mem(mem, 32, 8);
+					processes[i].remove_time();
+					std::cout << "PAGE TABLE [page,frame]:" << std::endl;
+					for(unsigned int m = 0; m < processes.size(); m++){
+						bool found = false;
+						int number = 0;
+						for(unsigned int k = 0; k < mem.size(); k++){
+							if(mem[k] == processes[m].get_name()){
+								if(found == false){
+									std::cout << processes[m].get_name() << ":";
+									found = true;
+								}
+								if(number % 10 == 0 && number != 0){
+									std::cout<<std::endl;
+								}
+								else{
+									std::cout<<" ";
+								}
+								std::cout << "[" << number << "," << k << "]" ;
+								number++;
+								
+							}
+						}
+						if(found == true){
+							std::cout << std::endl;
+						}
+					}
+
+					//Check if that was the last process to be removed
+					if (processes[i].num_proc() == 0){
+						processes.erase(processes.begin() + i);
+						i-=1;
+					}
+					
+				}
+
+				//THERE IS ENOUGH SPACE
+				else{
+					int count = 0;
+					for (unsigned int j = 0; j < mem.size(); j++){
+						if (mem[j] == '.'){	
+							mem[j] = processes[i].get_name();
+							count++;
+						}
+						if(count == processes[i].get_memframes()){
+							break;
+						}
+					}
+					std::cout << "time " << time << "ms: Placed process " << processes[i].get_name() << ":" <<std::endl;
+					print_mem(mem, 32, 8);
+					std::cout << "PAGE TABLE [page,frame]:" << std::endl;
+					for(unsigned int m = 0; m < processes.size(); m++){
+						bool found = false;
+						int number = 0;
+						for(unsigned int k = 0; k < mem.size(); k++){
+							if(mem[k] == processes[m].get_name()){
+								if(found == false){
+									std::cout << processes[m].get_name() << ":";
+									found = true;
+								}
+								if(number % 10 == 0 && number != 0){
+									std::cout<<std::endl;
+								}
+								else{
+									std::cout<<" ";
+								}
+								std::cout << "[" << number << "," << k << "]" ;
+								number++;							
+							}
+						}
+						if(found == true){
+							std::cout << std::endl;
+						}
+					}
+				}
+			}
+		}
+		time++;
+	}
+	
+	std::cout << "time " << time-2 << "ms: Simulator ended (Non-contiguous)" << std::endl;
+	return;
+}
+
 
 
 int main(int argc, char* argv[]){
@@ -626,6 +781,7 @@ int main(int argc, char* argv[]){
 	std::vector<Process> firstfit = processes;
 	std::vector<Process> bestfit = processes;
 	std::vector<Process> nextfit = processes;
+	std::vector<Process> noncont = processes;
 	
 
 	next_fit(memory, nextfit);
@@ -633,6 +789,8 @@ int main(int argc, char* argv[]){
 	first_fit(memory, firstfit);
 	std::cout << std::endl;
 	best_fit(memory, bestfit);
+	std::cout << std::endl;
+	non_contiguous(memory, noncont);
 	
 }
 
