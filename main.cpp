@@ -184,7 +184,6 @@ void next_fit(std::vector<char> mem, std::vector<Process> processes){
 	//int space = mem.size();
 	std::vector<Process> queue;
 
-
 	std::cout << "time " << time << "ms: Simulator started (Contiguous -- Next-Fit)" << std::endl;
 	while (processes.size() != 0){
 		
@@ -208,6 +207,7 @@ void next_fit(std::vector<char> mem, std::vector<Process> processes){
 
 		//THIS CHECKS TO SEE IF ANYTHING NEEDS TO BE ADDED / DEFRAGMENTATION
 		for (unsigned int i = 0; i < processes.size(); i++){
+			//std::cout << processes[i].get_name() << std::endl;
 			std::pair<int, int> proc_hold = processes[i].get_times();
 			//THIS MEANS THAT SOMETHING IS TO BE ADDED AT THIS TIME
 			if (proc_hold.first == time && proc_hold.first != -1){
@@ -224,6 +224,7 @@ void next_fit(std::vector<char> mem, std::vector<Process> processes){
 					//Check if that was the last process to be removed
 					if (processes[i].num_proc() == 0){
 						processes.erase(processes.begin() + i);
+						i-=1;
 					}
 
 
@@ -253,7 +254,7 @@ void next_fit(std::vector<char> mem, std::vector<Process> processes){
 						}
 					}
 					if (placed == false){
-						for (unsigned int j = 0; j < lastplaced; j++){
+						for (int j = 0; j < lastplaced; j++){
 							if (mem[j] == '.'){
 								if (check_location(mem, j, processes[i].get_memframes())){
 									place_here = (int)j;
@@ -272,6 +273,7 @@ void next_fit(std::vector<char> mem, std::vector<Process> processes){
 					//IT WAS NOT PLACED, DEFRAG PLS
 					if (!placed){
 						//defragged
+						std::cout << "time " << time << "ms: Cannot place process " << processes[i].get_name() << " -- starting defragmentation" << std::endl;
 						int offset = 0;
 						offset = defrag_mem(mem, time);
 						time += offset;
@@ -288,8 +290,9 @@ void next_fit(std::vector<char> mem, std::vector<Process> processes){
 						for (int n = defrag_place; n < defrag_place + processes[i].get_memframes(); n++){
 							mem[n] = processes[i].get_name();
 						}
+						lastplaced = defrag_place + processes[i].get_memframes();
 
-						std::cout << "time " << time << "ms: Placed process " << processes[i].get_name() << std::endl;	
+						std::cout << "time " << time << "ms: Placed process " << processes[i].get_name() << ":" << std::endl;	
 						
 						print_mem(mem, 32, 8);
 
@@ -302,6 +305,7 @@ void next_fit(std::vector<char> mem, std::vector<Process> processes){
 						for (int k = place_here; k < place_here+processes[i].get_memframes(); k++){
 							mem[k] = processes[i].get_name();
 						}
+						lastplaced = place_here+processes[i].get_memframes();
 						std::cout << "time " << time << "ms: Placed process " << processes[i].get_name() << ":" <<std::endl;
 						print_mem(mem, 32, 8);
 						
@@ -366,6 +370,7 @@ void best_fit(std::vector<char > mem, std::vector<Process> processes){
 					//Check if that was the last process to be removed
 					if (processes[i].num_proc() == 0){
 						processes.erase(processes.begin() + i);
+						i-=1;
 					}
 
 
@@ -386,6 +391,7 @@ void best_fit(std::vector<char > mem, std::vector<Process> processes){
 					//IT WAS NOT PLACED, DEFRAG PLS
 					if (!placed){
 						//defragged
+						std::cout << "time " << time << "ms: Cannot place process " << processes[i].get_name() << " -- starting defragmentation" << std::endl;
 						int offset = 0;
 						offset = defrag_mem(mem, time);
 						time += offset;
@@ -403,7 +409,7 @@ void best_fit(std::vector<char > mem, std::vector<Process> processes){
 							mem[n] = processes[i].get_name();
 						}
 						
-						std::cout << "time " << time << "ms: Placed process " << processes[i].get_name() << std::endl;	
+						std::cout << "time " << time << "ms: Placed process " << processes[i].get_name() << ":" << std::endl;	
 						print_mem(mem, 32, 8);
 
 											
@@ -476,6 +482,7 @@ void first_fit(std::vector<char> mem, std::vector<Process> processes){
 					//Check if that was the last process to be removed
 					if (processes[i].num_proc() == 0){
 						processes.erase(processes.begin() + i);
+						i-=1;
 					}
 
 
@@ -507,6 +514,7 @@ void first_fit(std::vector<char> mem, std::vector<Process> processes){
 					//IT WAS NOT PLACED, DEFRAG PLS
 					if (!placed){
 						//defragged
+						std::cout << "time " << time << "ms: Cannot place process " << processes[i].get_name() << " -- starting defragmentation" << std::endl;
 						int offset = 0;
 						offset = defrag_mem(mem, time);
 						time += offset;
@@ -524,7 +532,7 @@ void first_fit(std::vector<char> mem, std::vector<Process> processes){
 							mem[n] = processes[i].get_name();
 						}
 
-						std::cout << "time " << time << "ms: Placed process " << processes[i].get_name() << std::endl;	
+						std::cout << "time " << time << "ms: Placed process " << processes[i].get_name() << ":" << std::endl;	
 						
 						print_mem(mem, 32, 8);
 
@@ -594,6 +602,7 @@ int main(int argc, char* argv[]){
 			
 			temp1 = split(line, ' ');
 			p->create_process(temp1[0][0], std::atoi(temp1[1].c_str()) );
+			//std::cout << temp1[0] << std::endl;
 			//std::cout <<"Size of line:" << temp1[0] << " -- " << temp1.size()-2 << std::endl;
 			for (unsigned int i = 2; i < temp1.size(); i++){
 				std::vector<std::string> temp2;
